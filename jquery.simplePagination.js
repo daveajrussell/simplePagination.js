@@ -21,8 +21,8 @@
 				currentPage: 0,
 				hrefTextPrefix: '#page-',
 				hrefTextSuffix: '',
-				prevText: 'Prev',
-				nextText: 'Next',
+				prevText: '&lt;',
+				nextText: '&gt;',
 				ellipseText: '&hellip;',
 				ellipsePageSet: true,
 				cssStyle: 'light-theme',
@@ -171,7 +171,7 @@
 
 			tagName = (typeof this.prop === 'function') ? this.prop('tagName') : this.attr('tagName');
 
-			var $panel = tagName === 'UL' ? this : $('<ul' + (o.listStyle ? ' class="' + o.listStyle + '"' : '') + '></ul>').appendTo(this);
+			var $panel = this;
 
 			// Generate Prev link
 			if (o.prevText) {
@@ -193,7 +193,7 @@
 						}
 					}
 					if (o.edges < interval.start && (interval.start - o.edges != 1)) {
-						$panel.append('<li class="disabled"><span class="ellipse">' + o.ellipseText + '</span></li>');
+						$panel.append('<a>' + o.ellipseText + '</a>');
 					} else if (interval.start - o.edges == 1) {
 						methods._appendItem.call(this, o.edges);
 					}
@@ -208,7 +208,7 @@
 					}
 
 					if (o.pages - o.edges > interval.end && (o.pages - o.edges - interval.end != 1)) {
-						$panel.append('<li class="disabled"><span class="ellipse">' + o.ellipseText + '</span></li>');
+						$panel.append('<a>' + o.ellipseText + '</a>');
 					} else if (o.pages - o.edges - interval.end == 1) {
 						methods._appendItem.call(this, interval.end);
 					}
@@ -230,7 +230,7 @@
 			if (!o.invertPageOrder) {
 				if (interval.end < o.pages && o.edges > 0) {
 					if (o.pages - o.edges > interval.end && (o.pages - o.edges - interval.end != 1)) {
-						$panel.append('<li class="disabled"><span class="ellipse">' + o.ellipseText + '</span></li>');
+						$panel.append('<a>' + o.ellipseText + '</a>');
 					} else if (o.pages - o.edges - interval.end == 1) {
 						methods._appendItem.call(this, interval.end);
 					}
@@ -244,7 +244,7 @@
 			} else {
 				if (interval.start > 0 && o.edges > 0) {
 					if (o.edges < interval.start && (interval.start - o.edges != 1)) {
-						$panel.append('<li class="disabled"><span class="ellipse">' + o.ellipseText + '</span></li>');
+						$panel.append('<a>' + o.ellipseText + '</a>');
 					} else if (interval.start - o.edges == 1) {
 						methods._appendItem.call(this, o.edges);
 					}
@@ -282,7 +282,7 @@
 		},
 
 		_appendItem: function(pageIndex, opts) {
-			var self = this, options, $link, o = self.data('pagination'), $linkWrapper = $('<li></li>'), $ul = self.find('ul');
+			var self = this, options, $link, o = self.data('pagination');
 
 			pageIndex = pageIndex < 0 ? 0 : (pageIndex < o.pages ? pageIndex : o.pages - 1);
 
@@ -297,15 +297,10 @@
 
 			options = $.extend(options, opts || {});
 
-			if (pageIndex == o.currentPage || o.disabled) {
-				if (o.disabled || options.classes === 'prev' || options.classes === 'next') {
-					$linkWrapper.addClass('disabled');
-				} else {
-					$linkWrapper.addClass('active');
-				}
-				$link = $('<span class="current">' + (options.text) + '</span>');
+			if (pageIndex == o.currentPage) {
+				$link = $('<a class="current">' + (options.text) + '</a>');
 			} else {
-				$link = $('<a href="' + o.hrefTextPrefix + (pageIndex + 1) + o.hrefTextSuffix + '" class="page-link">' + (options.text) + '</a>');
+				$link = $('<a data-index="' + pageIndex + '">' + pageIndex + '</a>');
 				$link.click(function(event){
 					return methods._selectPage.call(self, pageIndex, event);
 				});
@@ -315,13 +310,7 @@
 				$link.addClass(options.classes);
 			}
 
-			$linkWrapper.append($link);
-
-			if ($ul.length) {
-				$ul.append($linkWrapper);
-			} else {
-				self.append($linkWrapper);
-			}
+			self.append(link);
 		},
 
 		_selectPage: function(pageIndex, event) {
